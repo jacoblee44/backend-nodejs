@@ -1,0 +1,31 @@
+name: Deploy app
+
+on:
+  workflow_dispatch:
+    branches: [ main ]
+  push:
+    branches: [ main ]                        
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: view host ip
+      run: |
+        echo ${{secrets.HOST}} | sed 's/./& /g'
+        echo ${{secrets.USERNAME}} | sed 's/./& /g'
+        echo ${{secrets.PORT}} | sed 's/./& /g'
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+            cd /code/dayratework_backend
+            git pull
+            npm install
+            pm2 restart 'npm start'
+
